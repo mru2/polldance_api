@@ -6,7 +6,7 @@ defmodule PollDance do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    port = String.to_integer(System.get_env("PORT"))
+    port = System.get_env("PORT") |> String.to_integer()
     IO.puts "Starting app on port #{port}"
 
     children = [

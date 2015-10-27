@@ -32,7 +32,9 @@ defmodule PollDance.Mixfile do
       {:cowboy, "~> 1.0.3"},
       {:plug, "~> 1.0.2"},
       {:poison, "~> 1.5"},
-      {:httpoison, "~> 0.7.2"}
+      {:httpoison, "~> 0.7.2"},
+      {:pipe, "~> 0.0.2"},
+      {:exactor, "~> 2.2"}
     ]
   end
 end

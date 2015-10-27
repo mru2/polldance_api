@@ -11,7 +11,9 @@ defmodule PollDance do
 
     children = [
       # API
-      Plug.Adapters.Cowboy.child_spec(:http, PollDance.Api, [], port: port)
+      Plug.Adapters.Cowboy.child_spec(:http, PollDance.Api, [], port: port),
+      # Geo store
+      worker(PollDance.Processes.GeoStore, [[name: :geo_store]])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -19,4 +21,7 @@ defmodule PollDance do
     opts = [strategy: :one_for_one, name: PollDance.Supervisor]
     Supervisor.start_link(children, opts)
   end
+
+  # Shortcuts for actions
+  def launch(name, loc), do: PollDance.Actions.Launch.run(name, loc)
 end

@@ -11,10 +11,9 @@ defmodule PollDance.Api do
     name = conn.params["name"]
     loc = { conn.params["lat"], conn.params["lng"] }
 
-    # TODO : guarantee name unicity only around a certain location radius
-    case PollDance.Playlists.launch(name, loc) do
+    case PollDance.launch(name, loc) do
       {:ok, playlist}           -> send_resp(conn, 201, snapshot(playlist))
-      {:error, {:existing, id}} -> send_resp(conn, 302, id)
+      {:error, {:existing, id}} -> conn |> put_resp_header("location", "/api/playlist/#{id}") |> send_resp(302, "")
       {:error, :invalid_params} -> send_resp(conn, 422, "")
       _                         -> send_resp(conn, 500, "An error happened")
     end
@@ -25,7 +24,7 @@ defmodule PollDance.Api do
   end
 
   defp snapshot(playlist) do
-    {lat, lng} = playlist.location
+    {lat, lng} = playlist.loc
     Poison.encode! %{
       id: playlist.id,
       name: playlist.name,

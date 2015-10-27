@@ -31,6 +31,16 @@ defmodule PollDance.Processes.GeoStore do
     new_state([point | points])
   end
 
+  # Returns all nearest playlists around a location
+  defcall nearest_around(loc, limit \\ 10), state: points do
+    points
+    |> around(loc)
+    |> Enum.sort_by( fn {_point, dist} -> dist end )
+    |> Enum.take(limit)
+    |> Enum.map( fn {point, dist} -> %{name: point.name, id: point.id, dist: dist} end )
+    |> reply
+  end
+
   # Select all the points around a location, and augment them with their distance
   defp around(points, loc) do
     points

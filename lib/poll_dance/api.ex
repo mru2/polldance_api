@@ -7,6 +7,7 @@ defmodule PollDance.Api do
   plug :match
   plug :dispatch
 
+  # Create a new playlist
   post "/api/playlist" do
     name = conn.params["name"]
     loc = { conn.params["lat"], conn.params["lng"] }
@@ -17,6 +18,13 @@ defmodule PollDance.Api do
       {:error, :invalid_params} -> send_resp(conn, 422, "")
       _                         -> send_resp(conn, 500, "An error happened")
     end
+  end
+
+  # List playlists around me
+  get "/api/playlists" do
+    loc = { conn.params["lat"] |> String.to_float, conn.params["lng"] |> String.to_float }
+    results = :geo_store |> PollDance.Processes.GeoStore.nearest_around(loc)
+    send_resp(conn, 200, Poison.encode!(results))
   end
 
   match _ do

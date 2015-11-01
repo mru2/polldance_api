@@ -3,6 +3,7 @@ defmodule PollDance.Actions.Launch do
 
   alias PollDance.Structs.Playlist
   alias PollDance.Processes.GeoStore
+  alias PollDance.Processes.PlaylistsSupervisor
 
   use Pipe
 
@@ -48,7 +49,8 @@ defmodule PollDance.Actions.Launch do
 
   # Launch a new playlist process
   defp launch_process(playlist = %Playlist{} = playlist) do
-    {:ok, playlist}
+    {:ok, playlist_pid} = :playlists |> PlaylistsSupervisor.start_playlist
+    {:ok, %Playlist{playlist | pid: playlist_pid}}
   end
 
   # Store playlist location for search

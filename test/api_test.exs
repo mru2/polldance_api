@@ -60,6 +60,23 @@ defmodule ApiTest do
         ]
       }
     )
+
+    assert_step(
+      "I should be able to check the status of a playlist",
+      {:get, "/api/playlists/670253020"},
+      %{
+        status: 200,
+        json: [
+          %{
+            "name" => "Test Playlist",
+            "id" => 670253020,
+            "tracks" => [],
+            "playing" => %{}
+          }
+        ]
+      }
+    )
+
   end
 
   defp assert_step(message, {method, path}, resp), do: assert_step(message, {method, path, nil}, resp)

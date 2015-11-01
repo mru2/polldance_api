@@ -13,7 +13,9 @@ defmodule PollDance do
       # API
       Plug.Adapters.Cowboy.child_spec(:http, PollDance.Api, [], port: port),
       # Geo store
-      worker(PollDance.Processes.GeoStore, [[name: :geo_store]])
+      worker(PollDance.Processes.GeoStore, [[name: :geo_store]]),
+      # Playlists
+      worker(PollDance.Processes.PlaylistsSupervisor, [[name: :playlists]])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -24,4 +26,6 @@ defmodule PollDance do
 
   # Shortcuts for actions
   def launch(name, loc), do: PollDance.Actions.Launch.run(name, loc)
+
+  def get_playlist(id), do: PollDance.Actions.Fetch.run(id)
 end

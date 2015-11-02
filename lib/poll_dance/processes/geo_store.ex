@@ -26,7 +26,7 @@ defmodule PollDance.Processes.GeoStore do
   end
 
   # Store a new playlist point
-  defcast store(name, loc, id, pid), state: points do
+  defcast store(name, loc, id), state: points do
     point = %Point{name: name, loc: loc, id: id}
     new_state([point | points])
   end

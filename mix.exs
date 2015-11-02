@@ -34,7 +34,8 @@ defmodule PollDance.Mixfile do
       {:poison, "~> 1.5"},
       {:httpoison, "~> 0.7.2"},
       {:pipe, "~> 0.0.2"},
-      {:exactor, "~> 2.2"}
+      {:exactor, "~> 2.2"},
+      {:uuid, "~> 1.1"}
     ]
   end
 end

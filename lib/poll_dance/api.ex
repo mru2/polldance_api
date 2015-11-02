@@ -1,16 +1,13 @@
 defmodule PollDance.Api do
 
   alias PollDance.Structs.Playlist
+  alias PollDance.Plugs.UserId
 
   use Plug.Router
   import Plug.Conn
 
   plug Plug.Parsers, parsers: [:json], json_decoder: Poison
-  plug Plug.Session, store: :cookie,
-                     key: "_polldance_session",
-                     encryption_salt: "e8514e1a77f13fa5ca0856dbf7ce1806",
-                     signing_salt: "2442a8a0fd83e5082eac2ca78beea10a",
-                     key_length: 64
+  plug UserId
   plug :match
   plug :dispatch
 

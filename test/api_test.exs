@@ -13,8 +13,6 @@ defmodule ApiTest do
         json: %{
           "id"     => 670253020,
           "name"   => "Test Playlist",
-          "lat"    => 51.5033630,
-          "lng"    => -0.1276250,
           "tracks" => []
         }
       }

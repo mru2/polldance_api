@@ -1,15 +1,17 @@
 defmodule PollDance.Utils.Scoring do
 
-  # 2013/01/01
-  @epoch 1356998400
-
   # Decrease rate (higher = longer value)
   @decay 1130
 
   def score(timestamps, now \\ :os.timestamp) do
     timestamps
-    |> Enum.map( fn ts -> get_delta_t(ts, now) end )
-    |> Enum.map( &get_score/1 )
+    |> Enum.map(
+      fn ts ->
+        ts
+        |> get_delta_t(now)
+        |> get_score()
+      end
+    )
     |> Enum.sum
   end
 

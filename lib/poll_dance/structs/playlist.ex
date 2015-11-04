@@ -1,8 +1,13 @@
 # Represent a launched playlist
+# The internal structure handled in the playlist process
 defmodule PollDance.Structs.Playlist do
-  defstruct id: nil, name: nil, tracks: %{}, pid: nil
+  defstruct name: nil, loc: nil, tracks: %{}
 
   alias PollDance.Structs.Track
+
+  def new(name, loc) do
+    %__MODULE__{name: name, loc: loc}
+  end
 
   # Snapshot for a user
   def snapshot(playlist) do

@@ -12,8 +12,10 @@ defmodule PollDance do
     children = [
       # API
       Plug.Adapters.Cowboy.child_spec(:http, PollDance.Api, [], port: port),
-      # Geo store
-      worker(PollDance.Processes.GeoStore, [[name: :geo_store]]),
+      # Registry
+      worker(PollDance.Processes.PlaylistsRegistry, [[name: :playlists_registry]]),
+      # Launcher
+      worker(PollDance.Processes.Launcher, [[]]),
       # Playlists
       worker(PollDance.Processes.PlaylistsSupervisor, [[name: :playlists]])
     ]
@@ -25,7 +27,7 @@ defmodule PollDance do
   end
 
   # Shortcuts for actions
-  def launch(name, loc), do: PollDance.Actions.Launch.run(name, loc)
+  def launch(name, loc), do: PollDance.Processes.Launcher.launch(name, loc)
 
   def get_playlist(id), do: PollDance.Actions.Fetch.run(id)
 end

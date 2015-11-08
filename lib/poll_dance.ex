@@ -12,12 +12,12 @@ defmodule PollDance do
     children = [
       # API
       Plug.Adapters.Cowboy.child_spec(:http, PollDance.Api, [], port: port),
-      # Registry
-      worker(PollDance.Processes.PlaylistsRegistry, [[name: :playlists_registry]]),
-      # Launcher
-      worker(PollDance.Processes.Launcher, [[]]),
       # Playlists
-      worker(PollDance.Processes.PlaylistsSupervisor, [[name: :playlists]])
+      worker(PollDance.PlaylistsSupervisor, [[name: :playlists_supervisor]]),
+      # Geo Search
+      worker(PollDance.GeoSearch, [[name: :geo_search]]),
+      # Launcher
+      worker(PollDance.Launcher, [[name: :launcher]])
     ]
 
     # See http://elixir-lang.org/docs/stable/elixir/Supervisor.html
@@ -26,8 +26,24 @@ defmodule PollDance do
     Supervisor.start_link(children, opts)
   end
 
-  # Shortcuts for actions
-  def launch(name, loc), do: PollDance.Processes.Launcher.launch(name, loc)
+  # GLobal helper methods, for console control and tests
+  def launch(name, loc) do
+    :launcher |> PollDance.Launcher.launch(name, loc)
+  end
 
-  def get_playlist(id), do: PollDance.Actions.Fetch.run(id)
+  def nearest_around(loc) do
+    :geo_search |> PollDance.GeoSearch.nearest_around(loc)
+  end
+
+  def snapshot(playlist_id) do
+    pid = PollDance.PlaylistsSupervisor.whereis(playlist_id)
+    case pid do
+      nil -> {:error, :not_found}
+      pid -> {:ok, pid |> PollDance.Playlist.get_snapshot}
+    end
+  end
+
+  def search(query) do
+
+  end
 end

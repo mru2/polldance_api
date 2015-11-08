@@ -1,13 +1,12 @@
 defmodule PollDance.Api do
 
-  alias PollDance.Structs.Playlist
-  alias PollDance.Plugs.UserId
+  alias PollDance.UserIdPlug
 
   use Plug.Router
   import Plug.Conn
 
   plug Plug.Parsers, parsers: [:json], json_decoder: Poison
-  plug UserId
+  plug UserIdPlug
   plug :match
   plug :dispatch
 
@@ -18,7 +17,9 @@ defmodule PollDance.Api do
     loc = { conn.params["lat"], conn.params["lng"] }
 
     case PollDance.launch(name, loc) do
-      {:ok, playlist}           -> send_resp(conn, 201, Playlist.snapshot(playlist))
+      {:ok, playlist_id} ->
+        {:ok, snapshot} = playlist_id |> PollDance.snapshot
+        send_resp(conn, 201, snapshot |> Poison.encode!)
       {:error, {:existing, id}} -> conn |> put_resp_header("location", "/api/playlist/#{id}") |> send_resp(302, "")
       {:error, :invalid_params} -> send_resp(conn, 422, "")
       _                         -> send_resp(conn, 500, "An error happened")
@@ -28,14 +29,16 @@ defmodule PollDance.Api do
   # List playlists around me
   get "/api/playlists" do
     loc = { conn.params["lat"] |> String.to_float, conn.params["lng"] |> String.to_float }
-    results = :geo_store |> PollDance.Processes.GeoStore.nearest_around(loc)
-    send_resp(conn, 200, Poison.encode!(results))
+    resp = PollDance.nearest_around(loc)
+           |> Enum.map( fn {id, name, dist} -> %{id: id, name: name, dist: dist} end )
+           |> Poison.encode!
+    send_resp(conn, 200, resp)
   end
 
   # Get a playlist's info
-  get "/api/playlists/:id" do
-    case PollDance.get_playlist(conn.params["integer"]) do
-      {:ok, playlist}      -> send_resp(conn, 200, Playlist.snapshot(playlist))
+  get "/api/playlists/:playlist_id" do
+    case PollDance.snapshot(playlist_id) do
+      {:ok, snapshot}      -> send_resp(conn, 200, Poison.encode!(snapshot))
       {:error, :not_found} -> send_resp(conn, 404, "")
       _                    -> send_resp(conn, 500, "An error happened")
     end

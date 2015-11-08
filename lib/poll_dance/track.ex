@@ -1,7 +1,8 @@
-defmodule PollDance.Structs.Track do
+# Track structure
+defmodule PollDance.Track do
   defstruct id: nil, kind: nil, artist: '', title: '', votes: %{}
 
-  alias PollDance.Utils.Scoring
+  alias PollDance.Scoring
 
   def snapshot(track) do
     %{

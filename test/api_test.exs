@@ -10,20 +10,17 @@ defmodule ApiTest do
       {:post, "/api/playlist", %{"lat" => 51.5033630, "lng" => -0.1276250, "name" => "Test Playlist"}},
       %{
         status: 201,
-        json: %{
-          "id"     => 670253020,
-          "name"   => "Test Playlist",
-          "tracks" => []
-        }
       }
     )
+
+    [{playlist_id, "Test Playlist", _dist} | _] = PollDance.nearest_around({51.5033630, -0.1276250})
 
     assert_step(
       "I should not be able to post again with the same name",
       {:post, "/api/playlist", %{"lat" => 51.505, "lng" => -0.1280, "name" => "Test Playlist"}},
       %{
         status: 302,
-        location: "/api/playlist/670253020"
+        location: "/api/playlist/#{playlist_id}"
       }
     )
 
@@ -44,35 +41,29 @@ defmodule ApiTest do
       {:get, "/api/playlists?lat=51.504&lng=-0.127"},
       %{
         status: 200,
-        json: [
-          %{
-            "name" => "Another Test Playlist",
-            "id" => 1808063896,
-            "dist" => 82.45358065381669
-          },
-          %{
-            "name" => "Test Playlist",
-            "id" => 670253020,
-            "dist" => 82.99651383831417
-          }
-        ]
       }
     )
 
+    # Get the nearest playlist
     assert_step(
       "I should be able to check the status of a playlist",
-      {:get, "/api/playlists/670253020"},
+      {:get, "/api/playlists/#{playlist_id}"},
       %{
         status: 200,
-        json: [
-          %{
-            "name" => "Test Playlist",
-            "id" => 670253020,
-            "tracks" => [],
-            "playing" => %{}
-          }
-        ]
+        json: %{
+          "name" => "Test Playlist",
+          "id" => playlist_id,
+          "tracks" => [],
+          "playing" => %{}
+        }
       }
+    )
+
+    # Search for tracks
+    assert_step(
+      "I should be able to search for tracks",
+      {:get, "/api/search?q=Daft%20Punk"},
+      []
     )
 
   end

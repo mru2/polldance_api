@@ -1,10 +1,34 @@
-defmodule PollDance.Utils.Haversine do
+defmodule PollDance.GeoCollection do
 
   @earth_radius 6_371_000
   @pi :math.pi
 
+  def new do
+    # Handled right now with a single collection
+    # Could be useful as a double mapping
+    []
+  end
+
+  def add(collection, {{lat, lng}, item}) do
+    [{{lat, lng}, item} | collection]
+  end
+
+  # Returns tuples of {item, dist}, ordered from near to far
+  def around(collection, center, radius \\ 1_000) do
+    collection
+    |> Enum.map( fn {loc, item} -> {item, distance_between(center, loc)} end )
+    |> Enum.filter( fn {_item, dist} -> ( dist <= radius ) end )
+    |> Enum.sort_by( fn {_item, dist} -> dist end )
+  end
+
+  # Remove an item with a filter function
+  def remove_item(collection, filter) do
+    collection
+    |> Enum.filter( fn {loc, item} -> !filter.(item) end )
+  end
+
   # Compute the distance between 2 points, using the haversine formula
-  def distance_between({lat1, lng1}, {lat2, lng2}) do
+  defp distance_between({lat1, lng1}, {lat2, lng2}) do
     fo_1 = degrees_to_radians(lat1)
     fo_2 = degrees_to_radians(lat2)
     diff_fo = degrees_to_radians(lat2 - lat1)

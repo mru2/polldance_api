@@ -1,38 +1,42 @@
 # In a separate process, in order to enforce race conditions on validations
-defmodule PollDance.Processes.Launcher do
+defmodule PollDance.Launcher do
 
-  alias PollDance.Processes.PlaylistsRegistry
-  alias PollDance.Processes.PlaylistsSupervisor
+  alias PollDance.GeoSearch
+  alias PollDance.PlaylistsSupervisor
 
   use GenServer
 
   def start_link(opts \\ []) do
-    GenServer.start_link(__MODULE__, nil, name: :launcher)
+    GenServer.start_link(__MODULE__, nil, opts)
   end
 
-  def launch(name, loc = {lat, lng})
+  def launch(pid, name, loc = {lat, lng})
     when is_bitstring(name)
     and  byte_size(name) > 0
     and  is_float(lat) > 0
     and  is_float(lng) > 0
     do
-    GenServer.call(:launcher, {:launch, name, loc})
+    GenServer.call(pid, {:launch, name, loc})
   end
+
 
   def launch(pid, _, _), do: {:error, :invalid_params}
 
   # Returns {:ok, id) or {:error, reason}
   def handle_call({:launch, name, loc}, _, _) do
-    case :playlists_registry |> PlaylistsRegistry.name_available?(name, loc) do
-      {:no, id} -> {:error, {:existing, id}}
+    case :geo_search |> GeoSearch.name_available?(name, loc) do
+      {:no, id} -> {:reply, {:error, {:existing, id}}, nil}
       :yes ->
         id = generate_uid
 
         # Launch the process (automatically registered by the supervisor)
-        {:ok, playlist_pid} = :playlists |> PlaylistsSupervisor.start_playlist(name, loc, id)
+        {:ok, _playlist_pid} = :playlists_supervisor |> PlaylistsSupervisor.start_playlist({id, name})
+
+        # Register the playlist in the geo store
+        :geo_search |> GeoSearch.register({id, name}, loc)
 
         # Return the id
-        id
+        {:reply, {:ok, id}, nil}
     end
   end
 

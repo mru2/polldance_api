@@ -1,7 +1,7 @@
 defmodule ScoringTest do
   use ExUnit.Case
 
-  alias PollDance.Utils.Scoring
+  alias PollDance.Scoring
 
   # Utils for votes
   def now do

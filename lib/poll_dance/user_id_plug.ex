@@ -1,5 +1,5 @@
 # Guarantees the presence of a user id in the cookies
-defmodule PollDance.Plugs.UserId do
+defmodule PollDance.UserIdPlug do
   alias Plug.Conn
   @behaviour Plug
 

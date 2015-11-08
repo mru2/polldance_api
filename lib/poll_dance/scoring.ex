@@ -1,4 +1,4 @@
-defmodule PollDance.Utils.Scoring do
+defmodule PollDance.Scoring do
 
   # Decrease rate (higher = longer value)
   @decay 1130

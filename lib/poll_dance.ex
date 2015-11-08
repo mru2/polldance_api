@@ -43,7 +43,36 @@ defmodule PollDance do
     end
   end
 
-  def search(query) do
+  def add_track(playlist_id, user_id, track) do
+    pid = PollDance.PlaylistsSupervisor.whereis(playlist_id)
+    case pid do
+      nil -> {:error, :not_found}
+      pid ->
+        pid |> PollDance.Playlist.add_track(user_id, track)
+        {:ok, pid |> PollDance.Playlist.get_snapshot}
+    end
+  end
 
+  def add_vote(playlist_id, user_id, track_id) do
+    pid = PollDance.PlaylistsSupervisor.whereis(playlist_id)
+    case pid do
+      nil -> {:error, :not_found}
+      pid ->
+        pid |> PollDance.Playlist.add_vote(user_id, track_id)
+        {:ok, pid |> PollDance.Playlist.get_snapshot}
+    end
+  end
+
+  def pop_top_track(playlist_id) do
+    pid = PollDance.PlaylistsSupervisor.whereis(playlist_id)
+    case pid do
+      nil -> {:error, :not_found}
+      pid ->
+        track = pid |> PollDance.Playlist.pop
+        case track do
+          nil -> {:error, :no_track_to_pop}
+          _   -> {:ok, PollDance.Track.snapshot(track)}
+        end
+    end
   end
 end

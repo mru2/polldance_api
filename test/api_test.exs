@@ -71,6 +71,81 @@ defmodule ApiTest do
       }
     )
 
+    # Adding a track
+    assert_step(
+      "I should be able to add a track",
+      {:post, "/api/playlists/#{playlist_id}/tracks", %{"artist" => "Daft Punk", "id" => "dz:67238732", "title" => "Instant Crush"}},
+      %{
+        status: 200,
+        json: %{
+          "name" => "Test Playlist",
+          "id" => playlist_id,
+          "tracks" => [
+            %{
+              "title" => "Instant Crush",
+              "artist" => "Daft Punk",
+              "id" => "dz:67238732"
+            }
+          ],
+          "playing" => %{}
+        }
+      }
+    )
+
+    # Vote for a track
+    assert_step(
+      "I should be able to vote for a track",
+      {:post, "/api/playlists/#{playlist_id}/tracks/dz:67238732"},
+      %{
+        status: 200,
+        json: %{
+          "name" => "Test Playlist",
+          "id" => playlist_id,
+          "tracks" => [
+            %{
+              "title" => "Instant Crush",
+              "artist" => "Daft Punk",
+              "id" => "dz:67238732"
+            }
+          ],
+          "playing" => %{}
+        }
+      }
+    )
+
+    # Pop the top track
+    assert_step(
+      "I should be able to pop the top track",
+      {:delete, "/api/playlists/#{playlist_id}/tracks"},
+      %{
+        status: 200,
+        json: %{
+          "title" => "Instant Crush",
+          "artist" => "Daft Punk",
+          "id" => "dz:67238732"
+        }
+      }
+    )
+
+    # Should have updated the playlist
+    assert_step(
+      "It should have updated the playlist",
+      {:get, "/api/playlists/#{playlist_id}"},
+      %{
+        status: 200,
+        json: %{
+          "name" => "Test Playlist",
+          "id" => playlist_id,
+          "tracks" => [],
+          "playing" => %{
+            "title" => "Instant Crush",
+            "artist" => "Daft Punk"
+          }
+        }
+      }
+    )
+
+
   end
 
   defp assert_step(message, {method, path}, resp), do: assert_step(message, {method, path, nil}, resp)

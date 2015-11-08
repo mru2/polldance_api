@@ -56,6 +56,25 @@ defmodule PollDance.Api do
     end
   end
 
+  # Add a track
+  post "/api/playlists/:playlist_id/tracks" do
+    track = PollDance.Track.new(conn.params["id"], conn.params["title"], conn.params["artist"])
+    {:ok, snapshot} = PollDance.add_track(playlist_id, UserIdPlug.get(conn), track)
+    send_resp(conn, 200, Poison.encode!(snapshot))
+  end
+
+  # Vote for a track
+  post "/api/playlists/:playlist_id/tracks/:track_id" do
+    {:ok, snapshot} = PollDance.add_vote(playlist_id, UserIdPlug.get(conn), track_id)
+    send_resp(conn, 200, Poison.encode!(snapshot))
+  end
+
+  # Pop the top track
+  delete "/api/playlists/:playlist_id/tracks" do
+    {:ok, track_snapshot} = PollDance.pop_top_track(playlist_id)
+    send_resp(conn, 200, Poison.encode!(track_snapshot))
+  end
+
   match _ do
     send_resp(conn, 404, "Not found")
   end

@@ -63,7 +63,12 @@ defmodule ApiTest do
     assert_step(
       "I should be able to search for tracks",
       {:get, "/api/search?q=Daft%20Punk"},
-      []
+      %{
+        status: 200,
+        json: [
+          %{"artist" => "Daft Punk", "id" => "dz:67238732", "title" => "Instant Crush"}, %{"artist" => "Daft Punk", "id" => "dz:66609426", "title" => "Get Lucky (Radio Edit)"}, %{"artist" => "Daft Punk", "id" => "dz:67238735", "title" => "Get Lucky"}, %{"artist" => "Daft Punk", "id" => "dz:3135553", "title" => "One More Time"}, %{"artist" => "Daft Punk", "id" => "dz:67238733", "title" => "Lose Yourself to Dance"}, %{"artist" => "Pentatonix", "id" => "dz:78383429", "title" => "Daft Punk"}, %{"artist" => "Daft Punk", "id" => "dz:67238728", "title" => "Give Life Back to Music"}, %{"artist" => "Daft Punk", "id" => "dz:3138820", "title" => "Around The World"}, %{"artist" => "Daft Punk", "id" => "dz:67238730", "title" => "Giorgio by Moroder"}, %{"artist" => "Daft Punk", "id" => "dz:67238739", "title" => "Doin' it Right"}, %{"artist" => "Daft Punk", "id" => "dz:3138878", "title" => "Harder Better Faster Stronger"}, %{"artist" => "Daft Punk", "id" => "dz:67238731", "title" => "Within"}, %{"artist" => "Daft Punk", "id" => "dz:67238729", "title" => "The Game of Love"}, %{"artist" => "Daft Punk", "id" => "dz:3135554", "title" => "Aerodynamic"}, %{"artist" => "Daft Punk", "id" => "dz:3135556", "title" => "Harder Better Faster Stronger"}, %{"artist" => "Daft Punk", "id" => "dz:67238734", "title" => "Touch"}, %{"artist" => "Daft Punk", "id" => "dz:3129772", "title" => "Da Funk"}, %{"artist" => "Daft Punk", "id" => "dz:67238740", "title" => "Contact"}, %{"artist" => "Daft Punk", "id" => "dz:67238736", "title" => "Beyond"}, %{"artist" => "Daft Punk", "id" => "dz:3135555", "title" => "Digital Love"}, %{"artist" => "Daft Punk", "id" => "dz:3135561", "title" => "Something About Us"}, %{"artist" => "Daft Punk", "id" => "dz:3167843", "title" => "Around The World / Harder Better Faster Stronger"}, %{"artist" => "Daft Punk", "id" => "dz:3135563", "title" => "Veridis Quo"}, %{"artist" => "Daft Punk", "id" => "dz:67238738", "title" => "Fragments of Time"}, %{"artist" => "Daft Punk", "id" => "dz:67238737", "title" => "Motherboard"}
+        ]
+      }
     )
 
   end

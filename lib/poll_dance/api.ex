@@ -44,6 +44,18 @@ defmodule PollDance.Api do
     end
   end
 
+  # Search for tracks
+  get "/api/search" do
+    query = conn.params["q"]
+    case query do
+      nil -> send_resp(conn, 422, "Please specify a query")
+      ""  -> send_resp(conn, 422, "Please specify a query")
+      q   ->
+        res = PollDance.Deezer.search(q) |> Enum.map( fn track -> PollDance.Track.snapshot(track) end )
+        send_resp(conn, 200, Poison.encode!(res))
+    end
+  end
+
   match _ do
     send_resp(conn, 404, "Not found")
   end

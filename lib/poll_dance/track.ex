@@ -1,8 +1,12 @@
 # Track structure
 defmodule PollDance.Track do
-  defstruct id: nil, kind: nil, artist: '', title: '', votes: %{}
+  defstruct id: nil, artist: '', title: '', votes: %{}
 
   alias PollDance.Scoring
+
+  def new(id, title, artist) do
+    %__MODULE__{id: id, title: title, artist: artist}
+  end
 
   def snapshot(track) do
     %{

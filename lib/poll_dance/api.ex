@@ -51,14 +51,14 @@ defmodule PollDance.Api do
       nil -> send_resp(conn, 422, "Please specify a query")
       ""  -> send_resp(conn, 422, "Please specify a query")
       q   ->
-        res = PollDance.Deezer.search(q) |> Enum.map( fn track -> PollDance.Track.snapshot(track) end )
+        res = PollDance.Deezer.search(q)
         send_resp(conn, 200, Poison.encode!(res))
     end
   end
 
   # Add a track
   post "/api/playlists/:playlist_id/tracks" do
-    track = PollDance.Track.new(conn.params["id"], conn.params["title"], conn.params["artist"])
+    track = {conn.params["id"], conn.params["title"], conn.params["artist"]}
     {:ok, snapshot} = PollDance.add_track(playlist_id, UserIdPlug.get(conn), track)
     send_resp(conn, 200, Poison.encode!(snapshot))
   end

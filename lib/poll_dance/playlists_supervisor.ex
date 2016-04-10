@@ -2,7 +2,7 @@
 # Also handle their launch
 defmodule PollDance.PlaylistsSupervisor do
 
-  alias PollDance.Playlist
+  alias PollDance.PlaylistProcess
 
   use Supervisor
 
@@ -23,7 +23,7 @@ defmodule PollDance.PlaylistsSupervisor do
 
   def init([]) do
     children = [
-      worker(Playlist, [], restart: :transient)
+      worker(PlaylistProcess, [], restart: :transient)
     ]
     supervise(children, strategy: :simple_one_for_one)
   end

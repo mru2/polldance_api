@@ -1,15 +1,50 @@
-# Both the playlist structure, and the process around it
-# Does it need the id, loc, name, etc ???
 defmodule PollDance.Playlist do
+
+  alias PollDance.Playlist
+  alias PollDance.Scoring
+
+  # Structure
   defstruct id: nil, name: nil, tracks: %{}, playing: nil
 
-  alias PollDance.Track
+  # Track definition
+  defmodule Track do
 
-  use ExActor.GenServer
+    # Structure
+    defstruct id: nil, artist: '', title: '', votes: %{}
 
-  # Structure logic
-  def new(id, name, loc) do
-    %__MODULE__{id: id, name: name}
+    # Initialization
+    def new(id, title, artist) do
+      %Track{id: id, title: title, artist: artist}
+    end
+
+    def snapshot(track) do
+      %{
+        id: track.id,
+        title: track.title,
+        artist: track.artist
+      }
+    end
+
+    def update_vote(%Track{votes: votes} = track, user_id) do
+      now = :os.timestamps
+      %Track{ track | votes: votes |> Map.put(user_id, now) }
+    end
+
+    def remove_vote(%Track{votes: votes} = track, user_id) do
+      %Track{ track | votes: votes |> Map.delete(user_id) }
+    end
+
+    def score(track, now \\ :os.timestamps) do
+      track.votes
+      |> Map.values
+      |> Scoring.score(now)
+    end
+
+  end
+
+  # Initialization
+  def new(id, name) do
+    %Playlist{id: id, name: name}
   end
 
   # Snapshot for a user
@@ -29,59 +64,45 @@ defmodule PollDance.Playlist do
     }
   end
 
+  # Ordered tracks
+  def sorted_tracks(%Playlist{tracks: tracks}) do
+    now = :os.timestamp
+    # Higher score is better
+    tracks
+    |> Map.values
+    |> Enum.sort_by( fn track -> -Track.score(track, now) end )
+  end
+
   # Manipulation
-  def add_track(%__MODULE__{tracks: tracks} = playlist, track) do
-    case playlist |> Map.has_key?(track.id) do
+  def add_track(%Playlist{tracks: tracks} = playlist, {track_id, track_title, track_artist}) do
+    track = Track.new(track_id, track_title, track_artist)
+    case tracks |> Map.has_key?(track.id) do
       true -> playlist
-      false -> %__MODULE__{ playlist | tracks: tracks |> Map.put(track.id, track) }
+      false -> %Playlist{ playlist | tracks: tracks |> Map.put(track.id, track) }
     end
   end
 
-  def add_vote(%__MODULE__{tracks: tracks} = playlist, track_id, user_id) do
-    case playlist |> Map.has_key?(track_id) do
+  def add_vote(%Playlist{tracks: tracks} = playlist, track_id, user_id) do
+    case tracks |> Map.has_key?(track_id) do
       false -> playlist
-      true  -> %__MODULE__{ playlist | tracks: tracks |> Map.update!(track_id, fn track -> track |> Track.update_vote(user_id) end) }
+      true  -> %Playlist{ playlist | tracks: tracks |> Map.update!(track_id, fn track -> track |> Track.update_vote(user_id) end) }
     end
   end
 
-  def pop_top_track(%__MODULE__{tracks: tracks} = playlist) do
+  def remove_vote(%Playlist{tracks: tracks} = playlist, track_id, user_id) do
+    case tracks |> Map.has_key?(track_id) do
+      false -> playlist
+      true  -> %Playlist{ playlist | tracks: tracks |> Map.update!(track_id, fn track -> track |> Track.remove_vote(user_id) end) }
+    end
+  end
+
+  def pop_top_track(%Playlist{tracks: tracks} = playlist) do
     top_track = playlist |> sorted_tracks |> Enum.take(1)
     case top_track do
       []      -> {nil, playlist}
-      [track] -> {track, %__MODULE__{ playlist | tracks: tracks |> Map.delete(track.id),
-                                                 playing: %{artist: track.artist, title: track.title} }}
+      [track] -> {track, %Playlist{ playlist | tracks: tracks |> Map.delete(track.id),
+                                               playing: %{artist: track.artist, title: track.title} }}
     end
   end
 
-  def sorted_tracks(%__MODULE__{tracks: tracks} = playlist) do
-    now = :os.timestamp
-    # Higher score is better
-    tracks |> Map.values |> Enum.sort_by( fn track -> -Track.score(track, now) end )
-  end
-
-  # Process methods
-  defstart start_link(id, name), gen_server_opts: :runtime do
-    playlist = %__MODULE__{id: id, name: name}
-    initial_state(playlist)
-  end
-
-  # Get a snapshot
-  defcall get_snapshot, state: playlist, do: reply(playlist |> snapshot)
-
-  # Add a track
-  defcast add_track(user_id, track), state: playlist do
-    playlist
-    |> add_track(track)
-    |> add_vote(track.id, user_id)
-    |> new_state
-  end
-
-  # Vote for a track
-  defcast add_vote(user_id, track_id), state: playlist, do: playlist |> add_vote(track_id, user_id) |> new_state
-
-  # Pop the top track
-  defcall pop, state: playlist do
-    {track, new_playlist} = playlist |> pop_top_track
-    set_and_reply(new_playlist, track)
-  end
 end

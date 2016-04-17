@@ -15,8 +15,6 @@ defmodule PollDance do
     IO.puts "Starting app on port #{port}"
 
     children = [
-      # API
-      Plug.Adapters.Cowboy.child_spec(:http, PollDance.Api, [], port: port),
       # Playlists
       worker(PlaylistsSupervisor, [[name: :playlists_supervisor]]),
       # Geo Search

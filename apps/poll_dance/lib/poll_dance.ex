@@ -11,9 +11,6 @@ defmodule PollDance do
   def start(_type, _args) do
     import Supervisor.Spec, warn: false
 
-    port = System.get_env("PORT") |> String.to_integer()
-    IO.puts "Starting app on port #{port}"
-
     children = [
       # Playlists
       worker(PlaylistsSupervisor, [[name: :playlists_supervisor]]),

@@ -21,7 +21,7 @@ defmodule PollDanceApi.Mixfile do
   # Type `mix help compile.app` for more information.
   def application do
     [mod: {PollDanceApi, []},
-     applications: [:phoenix, :cowboy, :logger, :gettext]]
+     applications: [:poll_dance, :phoenix, :cowboy, :logger, :gettext]]
   end
 
   # Specifies which paths to compile per environment.
@@ -32,7 +32,8 @@ defmodule PollDanceApi.Mixfile do
   #
   # Type `mix help deps` for examples and options.
   defp deps do
-    [{:phoenix, "~> 1.1.4"},
+    [{:poll_dance, in_umbrella: true},
+     {:phoenix, "~> 1.1.4"},
      {:gettext, "~> 0.9"},
      {:cowboy, "~> 1.0"}]
   end
